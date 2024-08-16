@@ -240,7 +240,7 @@ def convert_raw_to_klarf_content(
         if line.lstrip().lower().startswith("defectrecordspec"):
             defects = []
 
-            line_without_space = re.sub("\s+", " ", line).strip()
+            line_without_space = re.sub(r"\s+", " ", line).strip()
             parameters = line_without_space.strip().split(" ")
 
             defect_columns = {
@@ -369,7 +369,7 @@ def convert_raw_to_klarf_content(
             next_line_has_sample_test_plan = True
             has_sample_test_plan = True
         if next_line_has_sample_test_plan:
-            if line.startswith(" "):
+            if line.startswith(" ") or line.startswith("\t"):
                 sample_test_plan_value = line.strip().rstrip(";").split()
 
                 x = int(sample_test_plan_value[0])
