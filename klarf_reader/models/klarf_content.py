@@ -35,6 +35,8 @@ class SamplePlanTest:
 @dataclass
 class Defect:
     id: int
+    x: int
+    y: int
     x_rel: float
     y_rel: float
     x_index: int

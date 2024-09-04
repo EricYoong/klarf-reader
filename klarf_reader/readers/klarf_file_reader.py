@@ -74,6 +74,8 @@ def convert_raw_to_klarf_content(
 
     RAW_DEFECT_COLUMNS = [
         "DEFECTID",
+        "X",
+        "Y",
         "XREL",
         "YREL",
         "XINDEX",
@@ -263,7 +265,7 @@ def convert_raw_to_klarf_content(
                 continue
 
         if next_line_has_coords:
-            if line.startswith(" "):
+            if line.startswith(" ") or re.search(r'^(\d|\s\d)', line) is not None:
 
                 defect_parameters = line.strip().split(";")[0].split()
 
@@ -276,15 +278,18 @@ def convert_raw_to_klarf_content(
                     k.lower(): defect_parameters[v - 1]
                     for k, v in defect_columns_custom.items()
                 }
+                
+                x, y = defect_paramters_values.get("x"), defect_paramters_values.get("y")
 
-                x, y = convert_coordinates(
-                    die_pitch=die_pitch,
-                    sample_center_location=sample_center_location,
-                    xrel=float(defect_paramters_values.get("xrel")),
-                    yrel=float(defect_paramters_values.get("yrel")),
-                    xindex=int(defect_paramters_values.get("xindex")),
-                    yindex=int(defect_paramters_values.get("yindex")),
-                )
+                if x is None or y is None:
+                    x, y = convert_coordinates(
+                        die_pitch=die_pitch,
+                        sample_center_location=sample_center_location,
+                        xrel=float(defect_paramters_values.get("xrel")),
+                        yrel=float(defect_paramters_values.get("yrel")),
+                        xindex=int(defect_paramters_values.get("xindex")),
+                        yindex=int(defect_paramters_values.get("yindex")),
+                    )
 
                 roughbin = defect_paramters_values.get("roughbinnumber")
                 roughbin = int(roughbin) if roughbin is not None else 0
@@ -303,6 +308,8 @@ def convert_raw_to_klarf_content(
                 defects.append(
                     Defect(
                         id=int(defect_paramters_values.get("defectid")),
+                        x=float(defect_paramters_values.get("x")),
+                        y=float(defect_paramters_values.get("y")),
                         x_rel=float(defect_paramters_values.get("xrel")),
                         y_rel=float(defect_paramters_values.get("yrel")),
                         x_index=int(defect_paramters_values.get("xindex")),
@@ -351,7 +358,7 @@ def convert_raw_to_klarf_content(
 
         if next_line_has_numb and line.startswith(" "):
             next_line_has_numb = False
-            linewithoutSpace = re.sub("[\s;]+", " ", line).strip()
+            linewithoutSpace = re.sub("[\\s;]+", " ", line).strip()
 
             split = linewithoutSpace.split()
 
